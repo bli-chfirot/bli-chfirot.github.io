@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="מדריך /goal לקלוד קוד: איך זה עובד, מה יש בגול טוב, ו-10 גולים מוכנים להעתקה.">
+<meta property="og:title" content="מדריך הגול: איך כותבים גול שקלוד באמת מסיים">
+<meta property="og:description" content="10 גולים מוכנים להעתקה, ומה הבודק של קלוד קוד באמת רואה.">
+<meta property="og:image" content="hero.webp">
+<meta name="robots" content="noindex">
+<title>מדריך הגול</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;600&family=Karantina:wght@700&display=swap">
+<style>
+/* Layout: one narrow column, sections set as stadium-screen panels; the verdict colours do the talking */
+:root {
+  --night: #0a1424;      /* page ground: the stadium after sunset */
+  --panel: #10223a;      /* screen panels */
+  --panel-2: #0d1b2f;
+  --line: #22385a;
+  --fg: #edf2f9;
+  --muted: #9db0c8;
+  --amber: #ffbf57;      /* /goal and "not yet" */
+  --green: #7fe0a0;      /* "met" */
+  --red: #ff7a6b;        /* "impossible" */
+  --display: "Karantina", "Assistant", "Arial Hebrew", sans-serif;
+  --body: "Assistant", "Arial Hebrew", "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Assistant", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--night); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.6; margin: 0; }
+.wrap { max-width: 680px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px; display: grid; gap: 22px; }
+a { color: var(--amber); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.ltr { direction: ltr; unicode-bidi: isolate; font-family: var(--mono); font-size: 0.92em; }
+
+/* hero: the screen at the stadium */
+.hero { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; }
+.hero img { width: 100%; height: auto; display: block; aspect-ratio: 540 / 675; max-height: 420px; object-fit: cover; object-position: 50% 30%; }
+.hero-text { padding: 18px 18px 22px; display: grid; gap: 10px;
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 6px); }
+.tag { display: inline-flex; align-items: center; gap: 8px; color: var(--amber); font-family: var(--mono); font-weight: 600; font-size: 15px; direction: ltr; justify-self: start; }
+.tag::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--amber); box-shadow: inset 0 0 0 3px var(--panel), inset 0 0 0 7px var(--amber); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(44px, 12vw, 64px); line-height: 0.95; margin: 0; letter-spacing: 0.5px; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); font-size: 18px; }
+
+h2 { font-family: var(--display); font-weight: 700; font-size: 38px; line-height: 1; margin: 0; letter-spacing: 0.4px; text-wrap: balance; }
+section { display: grid; gap: 14px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 12px; }
+
+/* how it works: a real sequence, so it is numbered */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; counter-increment: s; }
+.steps li::before { content: counter(s); width: 34px; height: 34px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line); color: var(--amber); font-weight: 800; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+.steps p { margin: 0; min-width: 0; }
+.verdicts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.v { border-radius: 999px; padding: 3px 12px; font-weight: 700; font-size: 15px; border: 1px solid; }
+.v.no { color: var(--amber); border-color: rgba(255,191,87,0.45); background: rgba(255,191,87,0.08); }
+.v.yes { color: var(--green); border-color: rgba(127,224,160,0.45); background: rgba(127,224,160,0.08); }
+.v.imp { color: var(--red); border-color: rgba(255,122,107,0.45); background: rgba(255,122,107,0.08); }
+.note { margin: 0; color: var(--muted); font-size: 15.5px; }
+
+/* the three parts of a good goal */
+.parts { display: grid; gap: 10px; }
+.part { border-inline-start: 3px solid var(--green); padding-inline-start: 12px; }
+.part b { display: block; font-size: 18px; }
+.part span { color: var(--muted); }
+.key { background: var(--panel-2); border: 1px dashed rgba(255,191,87,0.5); border-radius: 14px; padding: 14px 16px; }
+.key b { color: var(--amber); }
+
+/* not this / this */
+.vs { display: grid; gap: 10px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pair > div { min-width: 0; border-radius: 12px; padding: 10px 12px; font-size: 15.5px; line-height: 1.45; }
+.pair .bad { background: rgba(255,122,107,0.08); border: 1px solid rgba(255,122,107,0.35); }
+.pair .good { background: rgba(127,224,160,0.08); border: 1px solid rgba(127,224,160,0.35); }
+.pair small { display: block; font-weight: 800; font-size: 13px; letter-spacing: 0.4px; margin-bottom: 2px; }
+.pair .bad small { color: var(--red); } .pair .good small { color: var(--green); }
+@media (max-width: 420px) { .pair { grid-template-columns: 1fr; } }
+
+/* the ten goals */
+.goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.goal { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px 12px 12px; display: grid; gap: 8px; }
+.goal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.goal-head b { font-size: 16px; }
+.copy { font: 700 14px var(--body); color: var(--night); background: var(--amber); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; flex: none; }
+.copy:active { transform: translateY(1px); }
+.copy.done { background: var(--green); }
+.cmd { margin: 0; background: var(--panel-2); border-radius: 10px; padding: 10px 12px; font-family: var(--body); font-size: 15.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; direction: rtl; }
+.cmd bdi { font-family: var(--mono); font-size: 0.9em; color: #ffd893; }
+
+/* commands */
+.cheats { display: grid; gap: 10px; }
+.cheat { display: grid; grid-template-columns: minmax(0, 150px) 1fr; gap: 12px; align-items: baseline; padding-block: 8px; border-bottom: 1px solid var(--line); }
+.cheat:last-child { border-bottom: 0; }
+.cheat code { font-family: var(--mono); font-size: 14.5px; color: var(--amber); direction: ltr; unicode-bidi: isolate; overflow-wrap: anywhere; }
+.cheat p { margin: 0; min-width: 0; }
+@media (max-width: 420px) { .cheat { grid-template-columns: 1fr; gap: 2px; } }
+
+/* follow */
+.cta { text-align: center; display: grid; gap: 12px; justify-items: center; padding-block: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 800; font-size: 17px; border-radius: 999px; padding: 12px 22px; }
+.btn.main { background: var(--amber); color: var(--night); }
+.btn.ghost { border: 1px solid var(--line); color: var(--fg); }
+footer { color: var(--muted); font-size: 13.5px; text-align: center; border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
+@media (prefers-reduced-motion: no-preference) { .copy { transition: background 0.15s ease; } }
+</style>
+
+</head>
+<body>
+<main class="wrap" dir="rtl" lang="he">
+
+  <header class="hero">
+    <img src="hero.webp" alt="הלוח הגדול באצטדיון כותב ״הושג!״ והמשתמש מרים ידיים" width="540" height="675">
+    <div class="hero-text">
+      <span class="tag">/goal</span>
+      <h1>איך כותבים גול שקלוד באמת מסיים</h1>
+      <p class="lede">במקום לכתוב ״תמשיך״ אחרי כל סבב, כותבים פעם אחת מה נחשב גמור. קלוד ממשיך לעבוד לבד, ומודל קטן ונפרד בודק אחרי כל סבב אם הגעתם.</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="how">
+    <h2 id="how">ככה זה עובד</h2>
+    <div class="panel">
+      <ol class="steps">
+        <li><p>בקלוד קוד כותבים <span class="ltr">/goal</span> ואחריו התנאי. הסבב הראשון מתחיל מיד, והתנאי עצמו הוא ההוראה.</p></li>
+        <li><p>בסוף כל סבב, מודל קטן ומהיר קורא את השיחה ומחליט:
+          <span class="verdicts"><span class="v no">עוד לא</span><span class="v yes">הושג</span><span class="v imp">בלתי אפשרי</span></span></p></li>
+        <li><p>״עוד לא״ מגיע עם סיבה, וקלוד משתמש בה כדי לדעת מה חסר בסבב הבא. ״הושג״ או ״בלתי אפשרי״ מסיימים את הגול.</p></li>
+      </ol>
+      <p class="note">גול אחד פעיל בכל שיחה. גול חדש מחליף את הקודם.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="rules">
+    <h2 id="rules">מה יש בגול טוב</h2>
+    <div class="parts">
+      <div class="part"><b>מצב סיום אחד שאפשר למדוד</b><span>תוצאת טסטים, build שעובר, מספר קבצים, תור ריק.</span></div>
+      <div class="part"><b>בדיקה מפורשת</b><span>איך קלוד מוכיח שהגיע. למשל <span class="ltr">npm test</span> מסתיים בלי שגיאות, או <span class="ltr">git status</span> נקי.</span></div>
+      <div class="part"><b>מה אסור לשנות בדרך</b><span>למשל ״בלי לגעת בקבצי טסט אחרים״.</span></div>
+      <div class="part"><b>ומגבלה</b><span>״או עצור אחרי 20 סבבים״. קלוד מדווח בכל סבב איפה הוא עומד מולה.</span></div>
+    </div>
+    <div class="key"><b>הכי חשוב לדעת:</b> הבודק לא מריץ פקודות ולא פותח קבצים. הוא קורא רק מה שקלוד הראה בשיחה. לכן ״כל הטסטים עוברים״ עובד: קלוד מריץ אותם, והתוצאה מופיעה בשיחה.</div>
+  </section>
+
+  <section aria-labelledby="vs">
+    <h2 id="vs">לא ככה, כן ככה</h2>
+    <div class="vs">
+      <div class="pair"><div class="bad"><small>לא</small>״תשפר את האתר״</div><div class="good"><small>כן</small><span class="ltr">npm run build</span> עובר בלי שגיאות, ו-<span class="ltr">npm test</span> עובר</div></div>
+      <div class="pair"><div class="bad"><small>לא</small>״תתקן את הבאגים״</div><div class="good"><small>כן</small>כל הטסטים ב-<span class="ltr">test/auth</span> עוברים, ושום קובץ טסט אחר לא השתנה</div></div>
+      <div class="pair"><div class="bad"><small>לא</small>״שהקוד יהיה נקי״</div><div class="good"><small>כן</small><span class="ltr">npm run lint</span> בלי שגיאות, בלי להוסיף <span class="ltr">eslint-disable</span></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ten">
+    <h2 id="ten">10 גולים מוכנים להעתקה</h2>
+    <p class="note">תחליפו נתיבים ופקודות לאלה של הפרויקט שלכם.</p>
+    <ol class="goals">
+      <li class="goal"><div class="goal-head"><b>טסטים</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal כל הטסטים ב-test/auth עוברים (npm test מסתיים בלי שגיאות), ושום קובץ טסט אחר לא השתנה. או עצור אחרי 20 סבבים'><bdi dir="ltr">/goal</bdi> כל הטסטים ב-<bdi dir="ltr">test/auth</bdi> עוברים (<bdi dir="ltr">npm test</bdi> מסתיים בלי שגיאות), ושום קובץ טסט אחר לא השתנה. או עצור אחרי 20 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>בילד נקי</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal npm run build מסתיים בלי שגיאות TypeScript. או עצור אחרי 15 סבבים'><bdi dir="ltr">/goal</bdi> <bdi dir="ltr">npm run build</bdi> מסתיים בלי שגיאות <bdi dir="ltr">TypeScript</bdi>. או עצור אחרי 15 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>לינט</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal npm run lint עובר בלי שגיאות, בלי להוסיף הערות eslint-disable. או עצור אחרי 10 סבבים'><bdi dir="ltr">/goal</bdi> <bdi dir="ltr">npm run lint</bdi> עובר בלי שגיאות, בלי להוסיף הערות <bdi dir="ltr">eslint-disable</bdi>. או עצור אחרי 10 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>מעבר לספרייה חדשה</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal אין יותר שימוש ב-oldClient: הפקודה grep -rn "oldClient" src לא מוצאת כלום, והטסטים עוברים. או עצור אחרי 25 סבבים'><bdi dir="ltr">/goal</bdi> אין יותר שימוש ב-<bdi dir="ltr">oldClient</bdi>: הפקודה <bdi dir="ltr">grep -rn "oldClient" src</bdi> לא מוצאת כלום, והטסטים עוברים. או עצור אחרי 25 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>פיצול קובץ ענק</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal הקובץ src/utils.js מפוצל לקבצים בתיקייה src/utils, כל קובץ שם קצר מ-200 שורות לפי wc -l, והטסטים עוברים. או עצור אחרי 20 סבבים'><bdi dir="ltr">/goal</bdi> הקובץ <bdi dir="ltr">src/utils.js</bdi> מפוצל לקבצים בתיקייה <bdi dir="ltr">src/utils</bdi>, כל קובץ שם קצר מ-200 שורות לפי <bdi dir="ltr">wc -l</bdi>, והטסטים עוברים. או עצור אחרי 20 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>רשימת באגים</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal כל הפריטים ב-BUGS.md מסומנים [x], ולכל תיקון יש טסט שעובר. או עצור אחרי 30 סבבים'><bdi dir="ltr">/goal</bdi> כל הפריטים ב-<bdi dir="ltr">BUGS.md</bdi> מסומנים <bdi dir="ltr">[x]</bdi>, ולכל תיקון יש טסט שעובר. או עצור אחרי 30 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>כיסוי טסטים</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal כיסוי הטסטים של src/payments הוא 80% ומעלה לפי npm run coverage, בלי למחוק טסטים קיימים. או עצור אחרי 20 סבבים'><bdi dir="ltr">/goal</bdi> כיסוי הטסטים של <bdi dir="ltr">src/payments</bdi> הוא 80% ומעלה לפי <bdi dir="ltr">npm run coverage</bdi>, בלי למחוק טסטים קיימים. או עצור אחרי 20 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>תיעוד</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal לכל endpoint בתיקייה routes יש סעיף ב-README.md עם דוגמה לבקשה ולתשובה. או עצור אחרי 15 סבבים'><bdi dir="ltr">/goal</bdi> לכל <bdi dir="ltr">endpoint</bdi> בתיקייה <bdi dir="ltr">routes</bdi> יש סעיף ב-<bdi dir="ltr">README.md</bdi> עם דוגמה לבקשה ולתשובה. או עצור אחרי 15 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>דף נחיתה תקין</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal הפקודה npx html-validate index.html עוברת בלי שגיאות, ולכל תמונה בדף יש alt. או עצור אחרי 10 סבבים'><bdi dir="ltr">/goal</bdi> הפקודה <bdi dir="ltr">npx html-validate index.html</bdi> עוברת בלי שגיאות, ולכל תמונה בדף יש <bdi dir="ltr">alt</bdi>. או עצור אחרי 10 סבבים</p></li>
+      <li class="goal"><div class="goal-head"><b>יומן שינויים</b><button class="copy" type="button">העתקה</button></div>
+        <p class="cmd" data-copy='/goal ב-CHANGELOG.md יש שורה לכל PR שמוזג השבוע. או עצור אחרי 10 סבבים'><bdi dir="ltr">/goal</bdi> ב-<bdi dir="ltr">CHANGELOG.md</bdi> יש שורה לכל <bdi dir="ltr">PR</bdi> שמוזג השבוע. או עצור אחרי 10 סבבים</p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="ctrl">
+    <h2 id="ctrl">לבדוק, לעצור, להריץ לבד</h2>
+    <div class="panel cheats">
+      <div class="cheat"><code>/goal</code><p>בלי תנאי: מציג את הגול, כמה זמן הוא רץ, כמה סבבים נבדקו, כמה טוקנים יצאו ומה הבודק אמר בפעם האחרונה.</p></div>
+      <div class="cheat"><code>/goal clear</code><p>עוצר את הגול לפני שהוא נגמר. גם <span class="ltr">stop</span>, <span class="ltr">off</span> ו-<span class="ltr">cancel</span> עובדים, וגם <span class="ltr">/clear</span> מנקה אותו.</p></div>
+      <div class="cheat"><code>Ctrl+O</code><p>מראה את הסיבה מאחורי כל החלטה של הבודק.</p></div>
+      <div class="cheat"><code>claude -p "/goal …"</code><p>מריץ את כל הלולאה בפקודה אחת, בלי ממשק.</p></div>
+    </div>
+    <p class="note">גול לא משנה הרשאות. כדי שירוץ בלי לעצור ולבקש אישור על כל פעולה, מפעילים אותו ב-<span class="ltr">auto mode</span>.</p>
+  </section>
+
+  <section class="cta" aria-label="עוד טריקים">
+    <h2>טריק אחד בכל סרטון</h2>
+    <a class="btn main" id="follow" href="https://www.instagram.com/bli.chfirot.ai/" target="_blank" rel="noopener">לעקוב באינסטגרם</a>
+    <a class="btn ghost" id="watch" href="https://www.instagram.com/bli.chfirot.ai/" target="_blank" rel="noopener">לצפות בפרק על הגול</a>
+  </section>
+
+  <footer>
+    <span>עמוד לא רשמי, לא קשור ל-Anthropic.</span>
+    <span>המידע לפי התיעוד הרשמי של Claude Code, אוקטובר 2026: <a href="https://code.claude.com/docs/en/goal" target="_blank" rel="noopener">code.claude.com/docs/en/goal</a></span>
+  </footer>
+</main>
+
+<script>
+document.querySelectorAll('.goal').forEach(function (g) {
+  var btn = g.querySelector('.copy'), cmd = g.querySelector('.cmd');
+  btn.addEventListener('click', function () {
+    var text = cmd.getAttribute('data-copy');
+    var done = function () { btn.textContent = 'הועתק ✓'; btn.classList.add('done'); setTimeout(function () { btn.textContent = 'העתקה'; btn.classList.remove('done'); }, 1800); };
+    var fallback = function () { var r = document.createRange(); r.selectNodeContents(cmd); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'סמנתי, העתיקו'; };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+});
+</script>
+
+</body>
+</html>
